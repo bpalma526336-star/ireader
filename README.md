@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ireader_web
 
 A new Flutter project.
@@ -14,3 +15,6 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+=======
+# ireader
+>>>>>>> 69b306c0324a6f3a2d960f1e7d3872028bfb538c
