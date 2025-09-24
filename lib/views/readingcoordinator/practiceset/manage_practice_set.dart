@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:ireader_web/model/practice_set.dart';
 import 'package:ireader_web/theme.dart';
 import 'package:ireader_web/views/admin/admindashboard.dart';
-import 'package:ireader_web/views/readingcoordinator/practiceset/add_practice_set.dart';
-import 'package:ireader_web/views/readingcoordinator/practiceset/edit_practice_set.dart';
+import 'package:ireader_web/views/admin/practice_set/add_practice_set.dart';
+import 'package:ireader_web/views/admin/practice_set/edit_practice_set.dart';
 import 'package:ireader_web/views/admin/schoolyear/manage_schoolyear.dart';
 
 class ManagePracticeSet extends StatefulWidget {
@@ -15,6 +15,7 @@ class ManagePracticeSet extends StatefulWidget {
 }
 
 class _ManagePracticeSetState extends State<ManagePracticeSet> {
+  String selectedFilter = "All";
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Stream<QuerySnapshot> fetchPracticeSet() {
@@ -141,6 +142,44 @@ class _ManagePracticeSetState extends State<ManagePracticeSet> {
       ),
       body: Column(
         children: [
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ChoiceChip(
+                  label: Text("All"),
+                  selected: selectedFilter == "All",
+                  onSelected: (selected) {
+                    setState(() {
+                      selectedFilter = "All";
+                    });
+                  },
+                ),
+                SizedBox(width: 8),
+                ChoiceChip(
+                  label: Text("View to All"),
+                  selected: selectedFilter == "View to All",
+                  onSelected: (selected) {
+                    setState(() {
+                      selectedFilter = "View to All";
+                    });
+                  },
+                ),
+                SizedBox(width: 8),
+                ChoiceChip(
+                  label: Text("View in Private"),
+                  selected: selectedFilter == "View in Private",
+                  onSelected: (selected) {
+                    setState(() {
+                      selectedFilter = "View in Private";
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: fetchPracticeSet(),
@@ -156,7 +195,16 @@ class _ManagePracticeSetState extends State<ManagePracticeSet> {
                   );
                 }
 
-                final practicesets = snapshot.data!.docs
+                // final practicesets = snapshot.data!.docs
+                //     .map(
+                //       (doc) => PracticeSet.fromMap(
+                //         doc.id,
+                //         doc.data() as Map<String, dynamic>,
+                //       ),
+                //     )
+                //     .toList();
+
+                var practicesets = snapshot.data!.docs
                     .map(
                       (doc) => PracticeSet.fromMap(
                         doc.id,
@@ -164,6 +212,12 @@ class _ManagePracticeSetState extends State<ManagePracticeSet> {
                       ),
                     )
                     .toList();
+
+                if (selectedFilter != "All") {
+                  practicesets = practicesets
+                      .where((set) => set.visibility == selectedFilter)
+                      .toList();
+                }
 
                 if (practicesets.isEmpty) {
                   return Center(
@@ -242,6 +296,14 @@ class _ManagePracticeSetState extends State<ManagePracticeSet> {
                                 Text("Category: ${practiceset.category}"),
                                 SizedBox(width: 16),
                                 Icon(
+                                  Icons.remove_red_eye_outlined,
+                                  size: 16,
+                                  color: AppTheme.textSecondaryColor,
+                                ),
+                                SizedBox(width: 4),
+                                Text("Visibility: ${practiceset.visibility}"),
+                                SizedBox(width: 16),
+                                Icon(
                                   Icons.question_answer_outlined,
                                   size: 16,
                                   color: AppTheme.textSecondaryColor,
@@ -307,6 +369,15 @@ class _ManagePracticeSetState extends State<ManagePracticeSet> {
     PracticeSet practiceset,
   ) async {
     if (value == "edit") {
+      if (practiceset.visibility == "View to All") {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("This practice set is locked for editing."),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+        return;
+      }
       Navigator.push(
         context,
         MaterialPageRoute(

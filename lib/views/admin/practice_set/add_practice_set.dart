@@ -49,7 +49,7 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
   ];
   String? selectedCategory;
 
-  final List<String> visibility = ["View to All", "View in Private"];
+  final List<String> visibility = ["View to Students", "Hide from Students"];
   String? selectedvisibility;
 
   @override
@@ -83,6 +83,31 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
   }
 
   Future<void> SavePracticeSet() async {
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Please fill in all required fields"),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    for (var q in questionsItems) {
+      if (q.questionController.text.trim().isEmpty ||
+          q.optionController.any((o) => o.text.trim().isEmpty)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Please complete all questions and options"),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+        return;
+      }
+    }
+
+    setState(() => _isLoading = true);
+
     try {
       final questions = questionsItems
           .map(
@@ -111,11 +136,15 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            "Quiz added successfully",
+            "Practice Set added successfully",
             style: TextStyle(color: Colors.white),
           ),
           backgroundColor: AppTheme.secondaryColor,
         ),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const ManagePracticeSet()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -228,7 +257,7 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     prefixIcon: Icon(
-                      Icons.remove_red_eye_outlined,
+                      Icons.remove_red_eye,
                       color: AppTheme.primaryColor,
                     ),
                     filled: true,
@@ -262,7 +291,7 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     prefixIcon: Icon(
-                      Icons.category_outlined,
+                      Icons.category,
                       color: AppTheme.primaryColor,
                     ),
                     filled: true,
@@ -295,7 +324,7 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
                     hintText: "Enter Reading Passage",
                     alignLabelWithHint: true,
                     prefixIcon: Icon(
-                      Icons.read_more_outlined,
+                      Icons.read_more,
                       color: AppTheme.primaryColor,
                     ),
                     filled: true,
@@ -374,6 +403,7 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Top row with Question label + delete button
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -398,7 +428,24 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
                                     ),
                                 ],
                               ),
-                              SizedBox(height: 16),
+
+                              // Instruction for older users
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 4.0,
+                                  bottom: 12.0,
+                                ),
+                                child: Text(
+                                  "To choose the correct answer, tap the small round button beside it.",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.textPrimaryColor,
+                                  ),
+                                ),
+                              ),
+
+                              // Question textfield
                               TextFormField(
                                 controller: question.questionController,
                                 decoration: InputDecoration(
@@ -416,7 +463,9 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
                                   return null;
                                 },
                               ),
-                              SizedBox(height: 16),
+                              const SizedBox(height: 16),
+
+                              // Options with radio buttons
                               ...question.optionController.asMap().entries.map((
                                 entry,
                               ) {
@@ -424,7 +473,7 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
                                 final controller = entry.value;
 
                                 return Padding(
-                                  padding: EdgeInsets.only(bottom: 8),
+                                  padding: const EdgeInsets.only(bottom: 8),
                                   child: Row(
                                     children: [
                                       Radio<int>(
@@ -443,8 +492,8 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
                                           controller: controller,
                                           decoration: InputDecoration(
                                             labelText:
-                                                "Option ${optionIndex + 1} ",
-                                            hintText: "Enter Option",
+                                                "Option ${optionIndex + 1}",
+                                            hintText: "Enter option",
                                           ),
                                           validator: (value) {
                                             if (value == null ||
@@ -468,6 +517,7 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
                     Center(
                       child: SizedBox(
                         height: 50,
+                        width: 200,
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : SavePracticeSet,
                           child: _isLoading
@@ -482,7 +532,7 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
                                   ),
                                 )
                               : Text(
-                                  "Save Quiz",
+                                  "Save Practice Set",
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,

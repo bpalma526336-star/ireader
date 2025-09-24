@@ -148,8 +148,12 @@ class _ManagePracticeSetState extends State<ManagePracticeSet> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ChoiceChip(
-                  label: Text("All"),
+                  label: Text(
+                    "All",
+                    style: TextStyle(color: AppTheme.textPrimaryColor),
+                  ),
                   selected: selectedFilter == "All",
+                  selectedColor: AppTheme.primaryColor,
                   onSelected: (selected) {
                     setState(() {
                       selectedFilter = "All";
@@ -158,21 +162,29 @@ class _ManagePracticeSetState extends State<ManagePracticeSet> {
                 ),
                 SizedBox(width: 8),
                 ChoiceChip(
-                  label: Text("View to All"),
-                  selected: selectedFilter == "View to All",
+                  label: Text(
+                    "View to Students",
+                    style: TextStyle(color: AppTheme.textPrimaryColor),
+                  ),
+                  selected: selectedFilter == "View to Students",
+                  selectedColor: AppTheme.primaryColor,
                   onSelected: (selected) {
                     setState(() {
-                      selectedFilter = "View to All";
+                      selectedFilter = "View to Students";
                     });
                   },
                 ),
                 SizedBox(width: 8),
                 ChoiceChip(
-                  label: Text("View in Private"),
-                  selected: selectedFilter == "View in Private",
+                  label: Text(
+                    "Hide from Students",
+                    style: TextStyle(color: AppTheme.textPrimaryColor),
+                  ),
+                  selected: selectedFilter == "Hide from Students",
+                  selectedColor: AppTheme.primaryColor,
                   onSelected: (selected) {
                     setState(() {
-                      selectedFilter = "View in Private";
+                      selectedFilter = "Hide from Students";
                     });
                   },
                 ),

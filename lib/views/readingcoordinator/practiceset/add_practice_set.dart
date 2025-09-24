@@ -37,6 +37,7 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
   final readingpassageController = TextEditingController();
   final timeLimitController = TextEditingController();
   final categoryController = TextEditingController();
+  final visibilityController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<QuestionFormItem> questionsItems = [];
   bool _isLoading = false;
@@ -47,6 +48,9 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
     "Independent",
   ];
   String? selectedCategory;
+
+  final List<String> visibility = ["View to All", "View in Private"];
+  String? selectedvisibility;
 
   @override
   void dispose() {
@@ -97,6 +101,7 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
               id: _firestore.collection("practiceset").doc().id,
               title: titleController.text.trim(),
               category: categoryController.text.trim(),
+              visibility: visibilityController.text.trim(),
               readingpassage: readingpassageController.text.trim(),
               timeLimit: int.parse(timeLimitController.text.trim()),
               questions: questions,
@@ -210,6 +215,40 @@ class _AddPracticeSetState extends State<AddPracticeSet> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "Please Enter Practice Set Title";
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 20),
+                DropdownButtonFormField<String>(
+                  value: selectedvisibility,
+                  decoration: InputDecoration(
+                    labelText: "Visibility",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    prefixIcon: Icon(
+                      Icons.remove_red_eye_outlined,
+                      color: AppTheme.primaryColor,
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                  items: visibility.map((visibility) {
+                    return DropdownMenuItem<String>(
+                      value: visibility,
+                      child: Text(visibility),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedvisibility = value;
+                      visibilityController.text = value ?? "";
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please Select Visibility";
                     }
                     return null;
                   },
